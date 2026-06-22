@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
-import { getPlaylistTracks, type Playlist } from "@/lib/mock-data";
+import type { Playlist } from "@/lib/mock-data";
 import { PlatformBadge } from "./platform-badge";
 import { PlaylistCover } from "./playlist-cover";
 
@@ -18,13 +18,13 @@ export function PlaylistCard({
   dictionary,
   compact = false,
 }: PlaylistCardProps) {
-  const trackCount = getPlaylistTracks(playlist).length;
+  const trackCount = playlist.trackIds.length;
 
   return (
-    <article className="glass-card interactive-lift reveal-in group rounded-lg p-4 hover:bg-white/82 hover:shadow-[18px_18px_38px_rgba(163,174,194,0.28),-18px_-18px_38px_rgba(255,255,255,0.74)]">
+    <article className="glass-card interactive-lift reveal-in group w-full min-w-0 self-start overflow-hidden rounded-lg p-4 hover:bg-white/82 hover:shadow-[18px_18px_38px_rgba(163,174,194,0.28),-18px_-18px_38px_rgba(255,255,255,0.74)]">
       <Link
         href={`/${locale}/playlist/${playlist.slug}`}
-        className="flex min-w-0 gap-4"
+        className="flex min-w-0 w-full gap-4"
       >
         <PlaylistCover playlist={playlist} size={compact ? "sm" : "md"} />
         <div className="min-w-0 flex-1">
@@ -36,7 +36,7 @@ export function PlaylistCard({
                 : dictionary.common.private}
             </span>
           </div>
-          <h2 className="mt-3 truncate text-lg font-black group-hover:text-[#030712]">
+          <h2 className="mt-3 line-clamp-2 break-words text-lg font-black leading-7 group-hover:text-[#030712]">
             {playlist.title[locale]}
           </h2>
           <p className="mt-1 line-clamp-2 text-sm leading-6 text-[var(--muted)]">

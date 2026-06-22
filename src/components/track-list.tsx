@@ -6,6 +6,9 @@ import type { Track } from "@/lib/mock-data";
 type TrackListProps = {
   tracks: Track[];
   actionLabel?: string;
+  onAction?: (track: Track) => void;
+  activeTrackId?: string | null;
+  onPlayTrack?: (track: Track) => void;
 };
 
 function TrackArtwork({ track }: { track: Track }) {
@@ -13,17 +16,36 @@ function TrackArtwork({ track }: { track: Track }) {
 
   return (
     <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-md bg-[#111827] shadow-[6px_6px_14px_rgba(163,174,194,0.24),-4px_-4px_12px_rgba(255,255,255,0.7)] ring-1 ring-black/5">
-      <span className="absolute inset-0 bg-[linear-gradient(145deg,rgba(255,255,255,0.24),rgba(255,255,255,0)_48%)]" />
-      <span className="absolute right-1 top-1 h-4 w-4 rounded-sm bg-white/18" />
-      <span className="absolute bottom-1 left-1 grid h-5 w-5 place-items-center rounded-sm bg-white text-[10px] font-black text-[#111827]">
-        {initial}
-      </span>
+      {track.imageUrl ? (
+        <span
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${track.imageUrl})` }}
+        />
+      ) : (
+        <>
+          <span className="absolute inset-0 bg-[linear-gradient(145deg,rgba(255,255,255,0.24),rgba(255,255,255,0)_48%)]" />
+          <span className="absolute right-1 top-1 h-4 w-4 rounded-sm bg-white/18" />
+          <span className="absolute bottom-1 left-1 grid h-5 w-5 place-items-center rounded-sm bg-white text-[10px] font-black text-[#111827]">
+            {initial}
+          </span>
+        </>
+      )}
     </div>
   );
 }
 
-export function TrackList({ tracks, actionLabel }: TrackListProps) {
-  const [playingTrackId, setPlayingTrackId] = useState<string | null>(null);
+export function TrackList({
+  tracks,
+  actionLabel,
+  onAction,
+  activeTrackId,
+  onPlayTrack,
+}: TrackListProps) {
+  const [internalPlayingTrackId, setInternalPlayingTrackId] = useState<string | null>(null);
+  const playingTrackId = activeTrackId ?? internalPlayingTrackId;
+  const handlePlayTrack = onPlayTrack ?? ((track: Track) => {
+    setInternalPlayingTrackId((current) => (current === track.id ? null : track.id));
+  });
 
   return (
     <div className="glass-card overflow-hidden rounded-lg">
@@ -42,11 +64,7 @@ export function TrackList({ tracks, actionLabel }: TrackListProps) {
                 type="button"
                 aria-label={`${track.title} play`}
                 aria-pressed={isPlaying}
-                onClick={() =>
-                  setPlayingTrackId((current) =>
-                    current === track.id ? null : track.id,
-                  )
-                }
+                onClick={() => handlePlayTrack(track)}
                 className={`pressable grid h-8 w-8 place-items-center rounded-full text-xs font-black transition ${
                   isPlaying
                     ? "soft-primary text-white"
@@ -84,7 +102,11 @@ export function TrackList({ tracks, actionLabel }: TrackListProps) {
                   {track.duration}
                 </span>
                 {actionLabel ? (
-                  <button className="soft-control pressable rounded-md px-3 py-1.5 text-xs font-bold transition">
+                  <button
+                    type="button"
+                    onClick={() => onAction?.(track)}
+                    className="soft-control pressable rounded-md px-3 py-1.5 text-xs font-bold transition"
+                  >
                     {actionLabel}
                   </button>
                 ) : null}

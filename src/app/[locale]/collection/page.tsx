@@ -1,9 +1,15 @@
 import Link from "next/link";
+import { getServerSession } from "next-auth/next";
 import { notFound } from "next/navigation";
+import { authOptions } from "@/auth";
+import { CollectionPlaylistActions } from "@/components/collection-playlist-actions";
 import { PlaylistCard } from "@/components/playlist-card";
 import { getDictionary } from "@/i18n/dictionaries";
 import { isLocale } from "@/i18n/config";
-import { getCreatedPlaylists, getSavedPlaylists } from "@/lib/mock-data";
+import { getCollectionPlaylists } from "@/server/playlists";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 type CollectionPageProps = {
   params: Promise<{
@@ -19,8 +25,16 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
   }
 
   const dictionary = getDictionary(locale);
-  const created = getCreatedPlaylists();
-  const saved = getSavedPlaylists();
+  let sessionEmail: string | null = null;
+
+  try {
+    const session = await getServerSession(authOptions);
+    sessionEmail = session?.user?.email ?? null;
+  } catch {
+    sessionEmail = null;
+  }
+
+  const { created, saved } = await getCollectionPlaylists(sessionEmail);
 
   return (
     <div className="reveal-in mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
@@ -58,14 +72,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
                   dictionary={dictionary}
                   compact
                 />
-                <div className="flex gap-2">
-                  <button className="soft-control rounded-md px-3 py-2 text-xs font-bold transition">
-                    {dictionary.common.edit}
-                  </button>
-                  <button className="soft-danger rounded-md px-3 py-2 text-xs font-bold transition">
-                    {dictionary.common.delete}
-                  </button>
-                </div>
+                <CollectionPlaylistActions playlist={playlist} locale={locale} />
               </div>
             ))}
           </div>

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
 import { getDictionary } from "@/i18n/dictionaries";
 import { isLocale, locales } from "@/i18n/config";
+import { Providers } from "@/components/providers";
 
 type LocaleLayoutProps = {
   children: React.ReactNode;
@@ -25,8 +26,10 @@ export default async function LocaleLayout({
   }
 
   return (
-    <AppShell locale={locale} dictionary={getDictionary(locale)}>
-      {children}
-    </AppShell>
+    <Providers>
+      <AppShell locale={locale} dictionary={getDictionary(locale)}>
+        {children}
+      </AppShell>
+    </Providers>
   );
 }

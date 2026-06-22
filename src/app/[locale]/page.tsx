@@ -2,7 +2,10 @@ import { notFound } from "next/navigation";
 import { PlaylistCard } from "@/components/playlist-card";
 import { getDictionary } from "@/i18n/dictionaries";
 import { isLocale } from "@/i18n/config";
-import { getAllTags, getPublicPlaylists } from "@/lib/mock-data";
+import { getAllTags, getExplorePlaylists, getFeaturedPlaylist } from "@/server/playlists";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 type ExplorePageProps = {
   params: Promise<{
@@ -18,9 +21,9 @@ export default async function ExplorePage({ params }: ExplorePageProps) {
   }
 
   const dictionary = getDictionary(locale);
-  const playlists = getPublicPlaylists();
-  const tags = getAllTags(locale);
-  const featured = [...playlists].sort((a, b) => b.saveCount - a.saveCount)[0];
+  const playlists = await getExplorePlaylists();
+  const tags = await getAllTags(locale);
+  const featured = await getFeaturedPlaylist();
 
   return (
     <div className="reveal-in mx-auto grid max-w-6xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_18rem] lg:px-8">

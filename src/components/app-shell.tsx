@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { getAlternateLocale, type Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { NavLinks } from "./nav-links";
+import { AuthButtons } from "./auth-buttons";
 
 type AppShellProps = {
   locale: Locale;
@@ -36,20 +37,12 @@ export function AppShell({ locale, dictionary, children }: AppShellProps) {
               </span>
             </Link>
 
-            <div className="flex items-center gap-2">
-              <Link
-                href={`/${alternateLocale}`}
-                className="soft-control rounded-md px-3 py-2 text-sm font-bold text-[#374151] transition"
-              >
-                {dictionary.app.language}
-              </Link>
-              <button className="soft-control inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-bold text-[#17171a] transition">
-                <span className="grid h-5 w-5 place-items-center rounded-full border border-[var(--line)] text-xs font-black">
-                  G
-                </span>
-                <span>{dictionary.app.signIn}</span>
-              </button>
-            </div>
+            <AuthButtons
+              alternateLocale={alternateLocale}
+              locale={locale}
+              signInLabel={dictionary.app.signIn}
+              languageLabel={dictionary.app.language}
+            />
           </div>
 
           <NavLinks locale={locale} dictionary={dictionary} />

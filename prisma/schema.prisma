@@ -1,0 +1,112 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String     @id @default(cuid())
+  name      String?
+  email     String?    @unique
+  image     String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  playlists Playlist[] @relation("UserPlaylists")
+  savedPlaylists SavedPlaylist[]
+  accounts Account[]
+  sessions Session[]
+}
+
+model Playlist {
+  id            String           @id @default(cuid())
+  slug          String           @unique
+  title         String
+  description   String?
+  ownerId       String
+  owner         User             @relation("UserPlaylists", fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerHandle   String?
+  sourcePlatform String
+  isPublic      Boolean          @default(true)
+  saveCount     Int              @default(0)
+  coverBase     String?
+  coverAccent   String?
+  tags          String[]         @default([])
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  tracks        PlaylistTrack[]
+  savedBy       SavedPlaylist[]
+}
+
+model Track {
+  id           String          @id @default(cuid())
+  title        String
+  artist       String
+  album        String
+  duration     String
+  platform     String
+  imageUrl     String?
+  externalUrl  String?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  playlistTracks PlaylistTrack[]
+}
+
+model PlaylistTrack {
+  id         String   @id @default(cuid())
+  playlistId String
+  trackId    String
+  position   Int
+  playlist   Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  track      Track    @relation(fields: [trackId], references: [id], onDelete: Restrict)
+
+  @@unique([playlistId, trackId])
+  @@index([playlistId, position])
+}
+
+model SavedPlaylist {
+  id         String   @id @default(cuid())
+  userId     String
+  playlistId String
+  savedAt    DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  playlist   Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, playlistId])
+  @@index([playlistId])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}

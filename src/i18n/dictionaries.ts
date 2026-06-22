@@ -20,6 +20,10 @@ const dictionaries = {
       saves: "저장",
       by: "by",
       save: "저장하기",
+      saved: "저장됨",
+      add: "추가",
+      remove: "제거",
+      loading: "불러오는 중",
       edit: "수정",
       delete: "삭제",
       preview: "미리보기",
@@ -58,6 +62,10 @@ const dictionaries = {
       search: "곡 검색",
       searchPlaceholder: "곡명 또는 아티스트 검색",
       selectedTracks: "추가할 곡",
+      liveMode: "실시간 연결",
+      demoMode: "데모 모드",
+      noResults: "검색 결과가 없습니다.",
+      searchHint: "두 글자 이상 입력하면 Spotify를 검색합니다.",
       createButton: "플레이리스트 생성",
     },
     import: {
@@ -70,6 +78,8 @@ const dictionaries = {
       detected: "감지된 플랫폼",
       previewTitle: "가져올 곡 미리보기",
       importButton: "Playlit에 저장",
+      unsupported:
+        "Apple Music은 현재 MusicKit 개발자 토큰이 필요해 데모 미리보기로 보여줍니다.",
     },
     detail: {
       back: "탐색으로 돌아가기",
@@ -97,6 +107,10 @@ const dictionaries = {
       saves: "saves",
       by: "by",
       save: "Save",
+      saved: "Saved",
+      add: "Add",
+      remove: "Remove",
+      loading: "Loading",
       edit: "Edit",
       delete: "Delete",
       preview: "Preview",
@@ -135,6 +149,10 @@ const dictionaries = {
       search: "Track search",
       searchPlaceholder: "Search by track or artist",
       selectedTracks: "Tracks to add",
+      liveMode: "Live connected",
+      demoMode: "Demo mode",
+      noResults: "No tracks found.",
+      searchHint: "Type at least two characters to search Spotify.",
       createButton: "Create playlist",
     },
     import: {
@@ -147,6 +165,8 @@ const dictionaries = {
       detected: "Detected platform",
       previewTitle: "Import preview",
       importButton: "Save to Playlit",
+      unsupported:
+        "Apple Music currently needs a MusicKit developer token, so the demo preview is shown for now.",
     },
     detail: {
       back: "Back to explore",

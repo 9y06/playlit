@@ -36,15 +36,16 @@ export function NavLinks({ locale, dictionary }: NavLinksProps) {
   ];
 
   return (
-    <nav className="soft-inset flex gap-1 overflow-x-auto rounded-lg p-1">
+    <nav className="glass-card flex w-full items-stretch overflow-x-auto border-0 bg-white/55 px-2 py-2">
       {navItems.map((item) => (
         <Link
           key={item.href}
           href={item.href}
+          aria-current={item.active ? "page" : undefined}
           className={
             item.active
-              ? "soft-control whitespace-nowrap rounded-md px-3 py-2 text-sm font-black text-[#111827]"
-              : "whitespace-nowrap rounded-md px-3 py-2 text-sm font-bold text-[#6b7280] transition hover:bg-white/45 hover:text-[#111827]"
+              ? "nav-tab relative flex min-h-10 items-center whitespace-nowrap px-4 text-sm font-black text-[#111827]"
+              : "nav-tab flex min-h-10 items-center whitespace-nowrap px-4 text-sm font-semibold text-[#6b7280] transition hover:text-[#111827]"
           }
         >
           {item.label}

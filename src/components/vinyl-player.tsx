@@ -1,27 +1,108 @@
 "use client";
 
-import { useState, type CSSProperties } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import type { Locale } from "@/i18n/config";
 import type { Playlist, Track } from "@/lib/mock-data";
 
 type VinylPlayerProps = {
   playlist: Playlist;
   locale: Locale;
-  tracks: Track[];
+  currentTrack?: Track | null;
+  isPlaying: boolean;
+  onTogglePlay: () => void;
 };
 
-export function VinylPlayer({ playlist, locale, tracks }: VinylPlayerProps) {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const currentTrack = tracks[0];
+export function VinylPlayer({
+  playlist,
+  locale,
+  currentTrack,
+  isPlaying,
+  onTogglePlay,
+}: VinylPlayerProps) {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const labels = {
     play: locale === "ko" ? "재생" : "Play",
     pause: locale === "ko" ? "일시정지" : "Pause",
     now: locale === "ko" ? "지금 재생" : "Now playing",
+    unavailable: locale === "ko" ? "재생 소스 없음" : "No playback source",
   };
   const style = {
     "--cover-base": playlist.cover.base,
     "--cover-accent": playlist.cover.accent,
   } as CSSProperties;
+  const playbackMode = (() => {
+    const playbackUrl =
+      currentTrack?.playbackUrl ??
+      currentTrack?.previewUrl ??
+      (currentTrack?.platform === "YouTube Music"
+        ? currentTrack.externalUrl
+        : undefined);
+
+    if (playbackUrl) {
+      if (
+        currentTrack?.platform === "YouTube Music" ||
+        playbackUrl.includes("youtube.com") ||
+        playbackUrl.includes("youtu.be")
+      ) {
+        try {
+          const parsed = new URL(playbackUrl);
+          const videoId =
+            parsed.hostname.includes("youtu.be")
+              ? parsed.pathname.split("/").filter(Boolean)[0] ?? ""
+              : parsed.searchParams.get("v") ?? "";
+
+          if (videoId) {
+            const start = parsed.searchParams.get("t") ?? parsed.searchParams.get("start");
+            const startSeconds = start?.replace(/s$/, "") ?? "";
+
+            return {
+              type: "youtube" as const,
+              url: `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&playsinline=1&controls=0&rel=0&modestbranding=1${
+                startSeconds ? `&start=${startSeconds}` : ""
+              }`,
+            };
+          }
+        } catch {
+          return { type: "none" as const, url: "" };
+        }
+      }
+
+      return { type: "audio" as const, url: playbackUrl };
+    }
+
+    return { type: "none" as const, url: "" };
+  })();
+
+  useEffect(() => {
+    const audio = audioRef.current;
+
+    if (playbackMode.type === "audio") {
+      if (!audio) {
+        return;
+      }
+
+      audio.src = playbackMode.url;
+
+      if (isPlaying) {
+        void audio.play().catch(() => {
+          audio.pause();
+        });
+      } else {
+        audio.pause();
+      }
+
+      return;
+    }
+
+    if (playbackMode.type === "youtube") {
+      return;
+    }
+
+    audio?.pause();
+    if (audio) {
+      audio.src = "";
+    }
+  }, [isPlaying, playbackMode]);
 
   return (
     <section className="glass-card-strong reveal-in rounded-lg p-4 sm:p-5">
@@ -64,6 +145,20 @@ export function VinylPlayer({ playlist, locale, tracks }: VinylPlayerProps) {
           <span className="absolute right-2 top-4 h-[70%] w-2 rounded-full bg-[#d1d5db] shadow-[inset_1px_1px_2px_rgba(255,255,255,0.8)]" />
           <span className="absolute bottom-2 left-4 h-5 w-8 rounded-sm bg-[#111827] shadow-[var(--shadow-soft-sm)]" />
         </div>
+
+        {playbackMode.type === "youtube" && isPlaying ? (
+          <iframe
+            title={currentTrack?.title ?? playlist.title[locale]}
+            src={playbackMode.url}
+            className="sr-only"
+            allow="autoplay; encrypted-media"
+            allowFullScreen
+          />
+        ) : null}
+
+        {playbackMode.type === "audio" ? (
+          <audio ref={audioRef} className="sr-only" preload="none" />
+        ) : null}
       </div>
 
       <div className="mt-4 flex items-center justify-between gap-4">
@@ -91,13 +186,19 @@ export function VinylPlayer({ playlist, locale, tracks }: VinylPlayerProps) {
               {currentTrack.artist}
             </p>
           ) : null}
+          {currentTrack && playbackMode.type === "none" ? (
+            <p className="mt-1 text-xs font-semibold text-[#8b5e34]">
+              {labels.unavailable}
+            </p>
+          ) : null}
         </div>
 
         <button
           type="button"
           aria-pressed={isPlaying}
-          onClick={() => setIsPlaying((current) => !current)}
-          className="soft-primary pressable shrink-0 rounded-full px-5 py-3 text-sm font-black"
+          onClick={onTogglePlay}
+          disabled={playbackMode.type === "none"}
+          className="soft-primary pressable shrink-0 rounded-full px-5 py-3 text-sm font-black disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isPlaying ? labels.pause : labels.play}
         </button>

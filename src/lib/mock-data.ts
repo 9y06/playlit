@@ -11,6 +11,10 @@ export type Track = {
   album: string;
   duration: string;
   platform: Platform;
+  imageUrl?: string;
+  externalUrl?: string;
+  previewUrl?: string;
+  playbackUrl?: string;
 };
 
 export type Playlist = {
@@ -261,4 +265,19 @@ export function getAllTags(locale: Locale) {
   return Array.from(
     new Set(playlists.flatMap((playlist) => playlist.tags.map((tag) => tag[locale]))),
   );
+}
+
+export function searchLocalTracks(query: string, limit = 8) {
+  const normalized = query.trim().toLowerCase();
+
+  if (!normalized) {
+    return tracks.filter((track) => track.platform === "Spotify").slice(0, limit);
+  }
+
+  return tracks
+    .filter((track) => {
+      const haystack = `${track.title} ${track.artist} ${track.album}`.toLowerCase();
+      return haystack.includes(normalized);
+    })
+    .slice(0, limit);
 }

@@ -105,6 +105,28 @@ input[type="checkbox"] {
   backdrop-filter: blur(22px) saturate(150%);
 }
 
+.nav-tab {
+  transition:
+    color 220ms var(--ease-out),
+    opacity 220ms var(--ease-out);
+}
+
+.nav-tab::after {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 9999px;
+  background: transparent;
+  content: "";
+  transition: background-color 220ms var(--ease-out);
+}
+
+.nav-tab[aria-current="page"]::after {
+  background: #111827;
+}
+
 .glass-card {
   border: 1px solid rgba(255, 255, 255, 0.68);
   background: var(--panel);
